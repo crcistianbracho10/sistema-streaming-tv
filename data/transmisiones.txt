@@ -1,0 +1,7 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="CanalC.ve", Canal C del Zulia
+https://cristianbracho900-ranking-20.hf.space/hls/index.m3u8
+#EXTINF:-1 tvg-id="Globovision.ve", Globovisión
+https://backup.thundernet.streampool.net/10323/live/hls/globovisionsd/1920_1080_3000_128/index_824.m3u8
+#EXTINF:-1 tvg-id="AguacateTV.ve", Aguacate TV
+https://streamtv.intervenhosting.net:3040/hybrid/play.m3u8
