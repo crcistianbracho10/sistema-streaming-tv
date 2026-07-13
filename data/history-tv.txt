@@ -1,0 +1,26 @@
+[CANAL]
+id=CanalC.ve
+country=Estado Zulia, Venezuela
+fundacion=23 de abril de 2024
+propietario=Cristian Bracho
+medio=Streaming
+eslogan=Cultura regional
+description=Canal C del Zulia es una televisora digital zuliana nacida para transformar la forma de consumir televisión en la región.
+
+[CANAL]
+id=Globovision.ve
+country=Caracas, Venezuela
+fundacion=1 de diciembre de 1994
+propietario=Raúl Gorrín
+medio=Noticias
+eslogan="Información responsable y veraz"
+description=Cadena de noticias de televisión abierta y streaming las 24 horas en Venezuela.
+
+[CANAL]
+id=AguacateTV.ve
+country=Barquisimeto, Venezuela
+fundacion=No registrada
+propietario=Desconocido
+medio=IPTV
+eslogan="Una nueva forma de comunicar"
+description=Canal digital regional con transmisión desde Barquisimeto, Estado Lara.
