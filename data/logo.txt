@@ -1,0 +1,4 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="CanalC.ve" tvg-name="Canal C del Zulia" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/4/43/Canal_C_del_Zulia.png" group-title="Entretenimiento", Canal C del Zulia
+#EXTINF:-1 tvg-id="Globovision.ve" tvg-name="Globovisión" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/c/c0/Logo-Globovisi%C3%B3n.png" group-title="Noticias", Globovisión
+#EXTINF:-1 tvg-id="AguacateTV.ve" tvg-name="Aguacate TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg" group-title="Entretenimiento", Aguacate TV
