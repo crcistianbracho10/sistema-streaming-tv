@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de TV en Vivo Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/openplayerjs@2.9.1/dist/openplayer.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/openplayerjs@2.9.1/dist/openplayer.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f9fafb; }
+        .channel-card { background-color: #111827; border: 1px solid #1f2937; transition: all 0.2s; }
+        .channel-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .op-player { border-radius: 12px; overflow: hidden; width: 100% !important; height: 100% !important; }
+    </style>
+</head>
+<body class="p-6">
+
+    <div id="main-grid-view">
+        <header class="mb-10">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold tracking-tight text-white">Ecosistema Streaming Pro</h1>
+                <button onclick="toggleModal(true)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition shadow-lg">➕ Agregar Canal</button>
+            </div>
+
+            <div class="mb-6">
+                <input type="text" id="searchInput" oninput="filtrarCanales()" placeholder="Buscar por nombre, país o categoría..." class="w-full px-5 py-3 rounded-xl border border-gray-700 text-white bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="flex gap-2 overflow-x-auto pb-4 no-scrollbar mb-4">
+                <button onclick="filtrarPorBoton('todos')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-medium">Todos</button>
+                <button onclick="filtrarPorBoton('entretenimiento')" class="bg-gray-800 text-gray-300 px-4 py-1.5 rounded-full text-xs font-medium hover:bg-gray-700">Entretenimiento</button>
+                <button onclick="filtrarPorBoton('noticias')" class="bg-gray-800 text-gray-300 px-4 py-1.5 rounded-full text-xs font-medium hover:bg-gray-700">Noticias</button>
+                <button onclick="filtrarPorBoton('animado')" class="bg-gray-800 text-gray-300 px-4 py-1.5 rounded-full text-xs font-medium hover:bg-gray-700">Animado</button>
+                <button onclick="filtrarPorBoton('locales')" class="bg-gray-800 text-gray-300 px-4 py-1.5 rounded-full text-xs font-medium hover:bg-gray-700">Locales</button>
+                <button onclick="filtrarPorBoton('internacionales')" class="bg-gray-800 text-gray-300 px-4 py-1.5 rounded-full text-xs font-medium hover:bg-gray-700">Internacionales</button>
+            </div>
+        </header>
+
+        <div id="channels-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+    </div>
+
+    <div id="channel-player-view" class="hidden max-w-6xl mx-auto mt-4 p-6 bg-gray-900 rounded-2xl border border-gray-800">
+        <button onclick="volverALaLista()" class="mb-6 bg-gray-800 text-gray-200 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-700 transition">← Volver a la Lista</button>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 w-full">
+                <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+                    <div id="player-dynamic-wrapper" class="w-full h-full"></div>
+                </div>
+                <div class="mt-6 flex items-center space-x-4 pb-4 border-b border-gray-800">
+                    <div id="detail-channel-logo-container" class="w-14 h-14 flex items-center justify-center rounded-lg bg-gray-800 p-1"></div>
+                    <div>
+                        <h2 id="detail-channel-name" class="text-2xl font-bold text-white">Nombre</h2>
+                        <p id="detail-channel-region" class="text-xs text-gray-400">Origen</p>
+                    </div>
+                </div>
+                <div class="mt-4 p-5 rounded-xl bg-gray-800/40 border border-gray-700 text-sm">
+                    <h4 class="text-xs font-bold text-blue-400 uppercase mb-2">Descripción / Reseña Histórica</h4>
+                    <p id="detail-channel-description-text" class="text-gray-300"></p>
+                </div>
+            </div>
+
+            <div class="p-5 rounded-xl bg-gray-950/40 border border-gray-800 text-xs space-y-4">
+                <h3 class="font-bold text-gray-400 uppercase border-b border-gray-800 pb-2">📋 Ficha Técnica</h3>
+                <div><span class="text-gray-500 block font-semibold">Fundación</span><span id="ft-fundacion" class="text-gray-200">--</span></div>
+                <div><span class="text-gray-500 block font-semibold">Propietario</span><span id="ft-propietario" class="text-gray-200">--</span></div>
+                <div><span class="text-gray-500 block font-semibold">Tipo de Medio</span><span id="ft-medio" class="text-gray-200">--</span></div>
+                <div><span class="text-gray-500 block font-semibold">Eslogan</span><span id="ft-eslogan" class="text-blue-400 italic">--</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-agregar-canal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto no-scrollbar">
+            <h3 class="text-lg font-bold text-white mb-4 border-b border-gray-800 pb-2">➕ Añadir Canal</h3>
+            <form id="form-nuevo-canal" onsubmit="enviarNuevoCanal(event)" class="space-y-4 text-xs text-gray-300">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block mb-1">Nombre *</label><input type="text" name="nombre" required class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"></div>
+                    <div><label class="block mb-1">URL Señal (.m3u8) *</label><input type="url" name="stream_url" required class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"></div>
+                    <div><label class="block mb-1">Categoría *</label><select name="categoria" class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"><option value="entretenimiento">Entretenimiento</option><option value="noticias">Noticias</option><option value="animado">Animado</option><option value="locales">Locales</option><option value="internacionales">Internacionales</option></select></div>
+                    <div><label class="block mb-1">Calidad *</label><select name="calidad" class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"><option value="1080p">1080p</option><option value="720p">720p</option><option value="480p">480p</option></select></div>
+                </div>
+                <div class="border-t border-gray-800 pt-3">
+                    <label class="block mb-1 font-bold">Logo del Canal</label>
+                    <input type="file" name="logo_file" accept="image/*" class="w-full bg-gray-800 p-1 mb-2">
+                    <input type="url" name="logo_url" placeholder="O pega una URL de imagen..." class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white">
+                </div>
+                <div class="border-t border-gray-800 pt-3 grid grid-cols-2 gap-4">
+                    <div><label class="block mb-1">País</label><input type="text" name="pais" class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"></div>
+                    <div><label class="block mb-1">Fundación</label><input type="text" name="fundacion" class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"></div>
+                </div>
+                <div><label class="block mb-1">Propietario</label><input type="text" name="propietario" class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"></div>
+                <div><label class="block mb-1">Eslogan</label><input type="text" name="eslogan" class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"></div>
+                <div><label class="block mb-1">Tipo Medio</label><input type="text" name="medio" class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white"></div>
+                <div><label class="block mb-1">Descripción</label><textarea name="descripcion" rows="3" class="w-full bg-gray-800 p-2 rounded border border-gray-700 text-white resize-none"></textarea></div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="toggleModal(false)" class="bg-gray-800 px-4 py-2 rounded">Cancelar</button>
+                    <button type="submit" class="bg-emerald-600 px-4 py-2 rounded text-white font-bold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let openPlayerInstance = null;
+        let listaCanalesGlobal = [];
+
+        document.addEventListener("DOMContentLoaded", cargarCanalesDesdeAPI);
+
+        async function cargarCanalesDesdeAPI() {
+            try {
+                const r = await fetch('/api/channels');
+                listaCanalesGlobal = await r.json();
+                renderizarCanales(listaCanalesGlobal);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderizarCanales(canales) {
+            const container = document.getElementById('channels-container');
+            container.innerHTML = '';
+            canales.forEach(canal => {
+                const card = document.createElement('div');
+                card.className = "channel-card flex flex-col items-center p-4 rounded-xl shadow-sm cursor-pointer";
+                card.onclick = () => abrirReproductor(canal);
+                card.innerHTML = `
+                    <img src="${canal.logo}" class="w-20 h-20 mb-2 object-contain rounded" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg';">
+                    <span class="text-sm font-bold text-gray-200 text-center">${canal.name}</span>
+                    <span class="status-badge text-[10px] font-extrabold mt-2 px-2 py-0.5 rounded bg-emerald-500 text-white">EN VIVO</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filtrarCanales() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const filtrados = listaCanalesGlobal.filter(c => {
+                return c.name.toLowerCase().includes(query) || c.country.toLowerCase().includes(query) || c.category.toLowerCase().includes(query) || c.stream.toLowerCase().includes(query);
+            });
+            renderizarCanales(filtrados);
+        }
+
+        function filtrarPorBoton(cat) {
+            if (cat === 'todos') { renderizarCanales(listaCanalesGlobal); }
+            else { renderizarCanales(listaCanalesGlobal.filter(c => c.category === cat)); }
+        }
+
+        function abrirReproductor(canal) {
+            document.getElementById('main-grid-view').classList.add('hidden');
+            document.getElementById('channel-player-view').classList.remove('hidden');
+            document.getElementById('detail-channel-name').innerText = canal.name;
+            document.getElementById('detail-channel-region').innerText = `Origen: ${canal.country}`;
+            document.getElementById('detail-channel-description-text').innerText = canal.description;
+            document.getElementById('ft-fundacion').innerText = canal.fundacion;
+            document.getElementById('ft-propietario').innerText = canal.propietario;
+            document.getElementById('ft-medio').innerText = canal.medio;
+            document.getElementById('ft-eslogan').innerText = canal.eslogan;
+            
+            const img = document.createElement('img'); 
+            img.src = canal.logo; 
+            img.className = "object-contain max-h-full";
+            img.onerror = function() { this.src = 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg'; };
+            document.getElementById('detail-channel-logo-container').innerHTML = "";
+            document.getElementById('detail-channel-logo-container').appendChild(img);
+
+            inicializarOpenPlayer(canal.stream);
+        }
+
+        function inicializarOpenPlayer(url) {
+            limpiarVideo();
+            const wrapper = document.getElementById('player-dynamic-wrapper');
+            wrapper.innerHTML = `<video id="main-player-core" class="op-player__media" controls autoplay muted playsinline><source src="${url}" type="application/x-mpegURL"></video>`;
+            openPlayerInstance = new OpenPlayerJS('main-player-core', { 
+                forceNative: false,
+                hls: { enableWorker: true, lowLatencyMode: true }
+            });
+            openPlayerInstance.init();
+        }
+
+        function limpiarVideo() {
+            if(openPlayerInstance) { openPlayerInstance.destroy(); openPlayerInstance = null; }
+            document.getElementById('player-dynamic-wrapper').innerHTML = "";
+        }
+
+        function volverALaLista() {
+            limpiarVideo();
+            document.getElementById('channel-player-view').classList.add('hidden');
+            document.getElementById('main-grid-view').classList.remove('hidden');
+            cargarCanalesDesdeAPI();
+        }
+
+        function toggleModal(show) {
+            document.getElementById('modal-agregar-canal').classList.toggle('hidden', !show);
+        }
+
+        async function enviarNuevoCanal(e) {
+            e.preventDefault();
+            const formData = new FormData(document.getElementById('form-nuevo-canal'));
+            const r = await fetch('/api/add-channel', { method: 'POST', body: formData });
+            if(r.ok) {
+                alert("¡Guardado exitoso!");
+                toggleModal(false);
+                document.getElementById('form-nuevo-canal').reset();
+                cargarCanalesDesdeAPI();
+            }
+        }
+    </script>
+</body>
+</html>
